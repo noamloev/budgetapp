@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/budget_models.dart';
+import '../../shared/budget_cycle.dart';
 import '../../shared/formatters.dart';
 import '../../shared/widgets/cards.dart';
 import '../../shared/widgets/empty_state_card.dart';
@@ -103,6 +104,8 @@ class PlanningScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentCycle = cycleForDate(DateTime.now(), data.budgetCycleStartDay);
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.all(20),
@@ -115,6 +118,7 @@ class PlanningScreen extends StatelessWidget {
               'Edit your monthly numbers here when income, tax, or your spending target changes.',
               'Category budgets help you spot overspending earlier.',
               'Recurring items and goals can both be edited from their menus.',
+              'The billing cycle day lives in Settings and decides when a new budget month starts.',
             ],
           ),
           const SizedBox(height: 20),
@@ -122,7 +126,7 @@ class PlanningScreen extends StatelessWidget {
             title: 'Income & Target',
             value:
                 '${money(data.monthlyIncome - data.monthlyTax)} net / ${money(data.monthlySpendingGoal)} goal',
-            subtitle: 'Your after-tax income against your monthly spending limit',
+            subtitle: 'Current cycle: ${currentCycle.label}',
             child: Padding(
               padding: const EdgeInsets.only(top: 12),
               child: Wrap(

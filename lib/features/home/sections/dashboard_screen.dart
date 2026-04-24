@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../models/budget_models.dart';
+import '../../shared/budget_cycle.dart';
 import '../../shared/formatters.dart';
 import '../../shared/widgets/cards.dart';
 import '../../shared/widgets/help_widgets.dart';
@@ -79,11 +80,12 @@ class DashboardScreen extends StatelessWidget {
       );
     }
 
+    final currentCycle = cycleForDate(DateTime.now(), data.budgetCycleStartDay);
     final incomeAfterTax = data.monthlyIncome - data.monthlyTax;
-    final spent = data.totalSpent;
+    final spent = cycleExpenseTotal(data.expenses, currentCycle);
     final recurring = data.totalRecurring;
     final incomeThisMonth = data.incomeEntries
-        .where((item) => item.date.year == DateTime.now().year && item.date.month == DateTime.now().month)
+        .where((item) => currentCycle.contains(item.date))
         .fold<double>(0, (sum, item) => sum + item.amount);
     final totalUsableIncome = incomeAfterTax + incomeThisMonth;
     final freeToUse = totalUsableIncome - spent - recurring;
@@ -95,7 +97,7 @@ class DashboardScreen extends StatelessWidget {
         .where((item) => item.category == 'Charity')
         .fold<double>(0, (sum, item) => sum + item.amount);
     final spentByCategory = <String, double>{};
-    for (final expense in data.expenses) {
+    for (final expense in data.expenses.where((item) => currentCycle.contains(item.date))) {
       spentByCategory.update(
         expense.category,
         (value) => value + expense.amount,
@@ -133,7 +135,7 @@ class DashboardScreen extends StatelessWidget {
             helpLines: const [
               'Net Income is income after tax.',
               'Add Income lets each partner record how much they put in this month.',
-              'Monthly Goal compares spending against the limit you set.',
+              'Monthly Goal compares spending against the current billing cycle, not necessarily the calendar month.',
               'Money Map highlights the biggest money buckets.',
               'Category bars and monthly review help you quickly spot problems.',
               'Everything on this screen belongs to the current login account budget.',
@@ -169,6 +171,11 @@ class DashboardScreen extends StatelessWidget {
                 const Text(
                   'A clean view of income, spending, automatic allocations, and long-term goals.',
                   style: TextStyle(color: Colors.white70, height: 1.4),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Current cycle: ${currentCycle.label}',
+                  style: const TextStyle(color: Colors.white70),
                 ),
                 const SizedBox(height: 24),
                 Wrap(
@@ -267,7 +274,7 @@ class DashboardScreen extends StatelessWidget {
             value: money(charity),
           ),
           const SizedBox(height: 20),
-          Text('Income This Month', style: Theme.of(context).textTheme.titleLarge),
+          Text('Income This Cycle', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           if (data.incomeEntries.isEmpty)
             Container(
@@ -287,10 +294,10 @@ class DashboardScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: InfoRowCard(
                   title: income.contributor,
-                  subtitle: '${income.title} - ${formatMonthYear(income.date)}',
-                  trailing: money(income.amount),
-                  onEdit: () => openIncome(income),
-                  onDelete: () => onDeleteIncome(income.id),
+                    subtitle: '${income.title} - ${formatMonthYear(income.date)}',
+                    trailing: money(income.amount),
+                    onEdit: () => openIncome(income),
+                    onDelete: () => onDeleteIncome(income.id),
                 ),
               ),
             ),
@@ -315,7 +322,7 @@ class DashboardScreen extends StatelessWidget {
           Text('Monthly Review', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
           InfoCard(
-            title: 'How this month looks',
+            title: 'How this cycle looks',
             value: money(spent),
             subtitle: reviewText,
             child: Padding(
@@ -326,6 +333,23 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 20),
+          Text('Past Cycles', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          ...recentCycles(data.budgetCycleStartDay, count: 4).skip(1).map(
+                (cycle) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: InfoRowCard(
+                    title: cycle.label,
+                    subtitle:
+                        '${money(cycleIncomeTotal(data.incomeEntries, cycle))} income - ${money(cycleExpenseTotal(data.expenses, cycle))} spent',
+                    trailing: money(
+                      cycleIncomeTotal(data.incomeEntries, cycle) -
+                          cycleExpenseTotal(data.expenses, cycle),
+                    ),
+                  ),
+                ),
+              ),
           const SizedBox(height: 20),
           Text('Recent Spending', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),

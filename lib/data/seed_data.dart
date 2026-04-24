@@ -5,6 +5,7 @@ BudgetData buildSeedBudgetData() {
     monthlyIncome: 0,
     monthlyTax: 0,
     monthlySpendingGoal: 0,
+    budgetCycleStartDay: 1,
     categoryBudgets: {},
     incomeEntries: [],
     expenses: [],

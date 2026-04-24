@@ -254,6 +254,7 @@ class BudgetData {
     required this.monthlyIncome,
     required this.monthlyTax,
     required this.monthlySpendingGoal,
+    required this.budgetCycleStartDay,
     required this.categoryBudgets,
     required this.incomeEntries,
     required this.expenses,
@@ -264,6 +265,7 @@ class BudgetData {
   double monthlyIncome;
   double monthlyTax;
   double monthlySpendingGoal;
+  int budgetCycleStartDay;
   final Map<String, double> categoryBudgets;
   final List<IncomeEntry> incomeEntries;
   final List<Expense> expenses;
@@ -289,6 +291,7 @@ class BudgetData {
       'monthlyIncome': monthlyIncome,
       'monthlyTax': monthlyTax,
       'monthlySpendingGoal': monthlySpendingGoal,
+      'budgetCycleStartDay': budgetCycleStartDay,
       'categoryBudgets': categoryBudgets,
       'incomeEntries': incomeEntries.map((item) => item.toJson()).toList(),
       'expenses': expenses.map((item) => item.toJson()).toList(),
@@ -311,6 +314,7 @@ class BudgetData {
       monthlyIncome: (json['monthlyIncome'] as num?)?.toDouble() ?? 0,
       monthlyTax: (json['monthlyTax'] as num?)?.toDouble() ?? 0,
       monthlySpendingGoal: (json['monthlySpendingGoal'] as num?)?.toDouble() ?? 0,
+      budgetCycleStartDay: (json['budgetCycleStartDay'] as num?)?.toInt() ?? 1,
       categoryBudgets: categoryBudgetsJson.map(
         (key, value) => MapEntry(key, (value as num).toDouble()),
       ),

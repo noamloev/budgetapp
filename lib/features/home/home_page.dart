@@ -5,7 +5,9 @@ import '../../data/budget_storage.dart';
 import '../../data/seed_data.dart';
 import '../../data/supabase_budget_repository.dart';
 import '../../models/budget_models.dart';
+import '../history/history_screen.dart';
 import '../shared/widgets/help_widgets.dart';
+import '../settings/settings_screen.dart';
 import 'forms/budget_settings_sheet.dart';
 import 'onboarding/onboarding_flow.dart';
 import 'sections/dashboard_screen.dart';
@@ -273,6 +275,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         onDeleteGoal: _deleteGoal,
         onContributeToGoal: _contributeToGoal,
       ),
+      HistoryScreen(data: data),
+      SettingsScreen(
+        cycleStartDay: data.budgetCycleStartDay,
+        onUpdateCycleStartDay: (day) {
+          setState(() {
+            data.budgetCycleStartDay = day;
+          });
+          _persist();
+        },
+      ),
     ];
 
     return Scaffold(
@@ -324,6 +336,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           NavigationDestination(
             icon: Icon(Icons.auto_graph_rounded),
             label: 'Plan',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.history_rounded),
+            label: 'History',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings_rounded),
+            label: 'Settings',
           ),
         ],
       ),
