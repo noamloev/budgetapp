@@ -53,7 +53,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _goNext() {
@@ -61,7 +63,12 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       final income = double.tryParse(incomeController.text);
       final tax = double.tryParse(taxController.text);
       final goal = double.tryParse(goalController.text);
-      if (income == null || income <= 0 || tax == null || tax < 0 || goal == null || goal <= 0) {
+      if (income == null ||
+          income <= 0 ||
+          tax == null ||
+          tax < 0 ||
+          goal == null ||
+          goal <= 0) {
         _showError('Enter valid income, tax, and monthly goal values.');
         return;
       }
@@ -89,14 +96,20 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
     final hasGoalAmount = goalTargetController.text.trim().isNotEmpty;
 
     if ((hasRecurringName || hasRecurringAmount) &&
-        (!hasRecurringName || recurringAmount == null || recurringAmount <= 0)) {
-      _showError('Complete the recurring allocation with a valid positive amount or leave it blank.');
+        (!hasRecurringName ||
+            recurringAmount == null ||
+            recurringAmount <= 0)) {
+      _showError(
+        'Complete the recurring allocation with a valid positive amount or leave it blank.',
+      );
       return;
     }
 
     if ((hasGoalName || hasGoalAmount) &&
         (!hasGoalName || goalTarget == null || goalTarget <= 0)) {
-      _showError('Complete the first goal with a valid positive target or leave it blank.');
+      _showError(
+        'Complete the first goal with a valid positive target or leave it blank.',
+      );
       return;
     }
 
@@ -105,7 +118,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
         monthlyIncome: double.parse(incomeController.text),
         monthlyTax: double.parse(taxController.text),
         monthlyGoal: double.parse(goalController.text),
-        firstRecurring: recurringNameController.text.trim().isEmpty || recurringAmount == null
+        firstRecurring:
+            recurringNameController.text.trim().isEmpty ||
+                recurringAmount == null
             ? null
             : RecurringAllocation(
                 id: makeId(),
@@ -134,25 +149,34 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       _StepShell(
         eyebrow: 'Step 1',
         title: 'Set your core budget',
-        subtitle: 'These numbers unlock the dashboard and every spending calculation.',
+        subtitle:
+            'These numbers unlock the dashboard and every spending calculation.',
         child: Column(
           children: [
             TextField(
               controller: incomeController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(labelText: 'Monthly income'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: taxController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(labelText: 'Monthly tax'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: goalController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Monthly spending goal'),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Monthly spending goal',
+              ),
             ),
           ],
         ),
@@ -160,7 +184,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       _StepShell(
         eyebrow: 'Step 2',
         title: 'Optional automatic transfer',
-        subtitle: 'Seed your plan with one recurring move like investing or charity.',
+        subtitle:
+            'Seed your plan with one recurring move like investing or charity.',
         child: Column(
           children: [
             TextField(
@@ -170,14 +195,18 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             const SizedBox(height: 12),
             TextField(
               controller: recurringAmountController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(labelText: 'Amount'),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: recurringCategory,
               items: const ['Investing', 'Charity', 'Savings', 'Bills', 'Other']
-                  .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+                  .map(
+                    (item) => DropdownMenuItem(value: item, child: Text(item)),
+                  )
                   .toList(),
               onChanged: (value) => setState(() => recurringCategory = value!),
               decoration: const InputDecoration(labelText: 'Category'),
@@ -198,7 +227,9 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
             const SizedBox(height: 12),
             TextField(
               controller: goalTargetController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(labelText: 'Target amount'),
             ),
           ],
@@ -218,7 +249,10 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
                   const Expanded(
                     child: Text(
                       'Welcome to Budget Flow',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                   const HelpIconButton(
@@ -321,12 +355,17 @@ class _StepShell extends StatelessWidget {
             children: [
               Text(
                 eyebrow,
-                style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 title,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineMedium?.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 8),
               Text(

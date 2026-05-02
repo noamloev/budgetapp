@@ -22,9 +22,7 @@ class GitHubReleaseService {
   Future<GitHubReleaseInfo?> fetchLatestRelease() async {
     final response = await http.get(
       Uri.parse('https://api.github.com/repos/$repo/releases/latest'),
-      headers: const {
-        'Accept': 'application/vnd.github+json',
-      },
+      headers: const {'Accept': 'application/vnd.github+json'},
     );
 
     if (response.statusCode != 200) {
@@ -45,7 +43,8 @@ class GitHubReleaseService {
 
     return GitHubReleaseInfo(
       version: (json['tag_name'] as String? ?? '').trim(),
-      releaseUrl: json['html_url'] as String? ?? 'https://github.com/$repo/releases',
+      releaseUrl:
+          json['html_url'] as String? ?? 'https://github.com/$repo/releases',
       apkUrl: apkUrl,
     );
   }

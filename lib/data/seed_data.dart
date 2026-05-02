@@ -11,5 +11,8 @@ BudgetData buildSeedBudgetData() {
     expenses: [],
     recurringAllocations: [],
     goals: [],
+    goalContributions: [],
+    stockHoldings: [],
+    portfolioSnapshots: [],
   );
 }

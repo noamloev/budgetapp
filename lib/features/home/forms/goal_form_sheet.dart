@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
 import '../../../models/budget_models.dart';
 import '../../shared/widgets/app_sheet.dart';
 
 class GoalFormSheet extends StatefulWidget {
-  const GoalFormSheet({
-    super.key,
-    this.initialGoal,
-  });
+  const GoalFormSheet({super.key, this.initialGoal});
 
   final FinancialGoal? initialGoal;
 
@@ -48,38 +46,42 @@ class _GoalFormSheetState extends State<GoalFormSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final isEditing = widget.initialGoal != null;
 
     return AppSheet(
-      title: isEditing ? 'Edit Goal' : 'Add Goal',
-      helpTitle: 'Goals',
-      helpLines: const [
-        'Goals turn budgeting into progress toward something meaningful.',
-        'You can edit the target later and add contributions over time.',
+      title: isEditing
+          ? (t.isHebrew ? 'ערוך יעד' : 'Edit Goal')
+          : t.text('add_goal'),
+      helpTitle: t.isHebrew ? 'יעדים' : 'Goals',
+      helpLines: [
+        t.isHebrew
+            ? 'יעדים הופכים את התקציב להתקדמות למשהו חשוב.'
+            : 'Goals turn budgeting into progress toward something meaningful.',
       ],
       child: Column(
         children: [
           TextField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: 'Goal name'),
+            decoration: InputDecoration(labelText: t.text('goal_name')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: targetController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Target amount'),
+            decoration: InputDecoration(labelText: t.text('target_amount')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: savedController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Already saved'),
+            decoration: InputDecoration(labelText: t.text('already_saved')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: yearController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Target year'),
+            decoration: InputDecoration(labelText: t.text('target_year')),
           ),
           const SizedBox(height: 18),
           SizedBox(
@@ -97,9 +99,11 @@ class _GoalFormSheetState extends State<GoalFormSheet> {
                     year < DateTime.now().year ||
                     nameController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text(
-                        'Enter a valid goal, positive target, non-negative saved amount, and a future year.',
+                        t.isHebrew
+                            ? 'הכנס יעד תקין, סכום יעד חיובי, סכום נחסך לא שלילי ושנת יעד עתידית.'
+                            : 'Enter a valid goal, positive target, non-negative saved amount, and a future year.',
                       ),
                     ),
                   );
@@ -117,7 +121,7 @@ class _GoalFormSheetState extends State<GoalFormSheet> {
                   ),
                 );
               },
-              child: Text(isEditing ? 'Save Changes' : 'Save Goal'),
+              child: Text(isEditing ? t.saveChanges : t.text('save_goal')),
             ),
           ),
         ],

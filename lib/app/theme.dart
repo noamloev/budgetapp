@@ -17,7 +17,10 @@ ThemeData buildAppTheme() {
     colorScheme: scheme,
     scaffoldBackgroundColor: canvas,
     textTheme: const TextTheme(
-      headlineMedium: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.8),
+      headlineMedium: TextStyle(
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.8,
+      ),
       titleLarge: TextStyle(fontWeight: FontWeight.w800, letterSpacing: -0.4),
       titleMedium: TextStyle(fontWeight: FontWeight.w700),
       bodyLarge: TextStyle(height: 1.35),

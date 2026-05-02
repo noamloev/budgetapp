@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
 import '../../../models/budget_models.dart';
 import '../../shared/formatters.dart';
 import '../../shared/widgets/app_sheet.dart';
 
 class RecurringFormSheet extends StatefulWidget {
-  const RecurringFormSheet({
-    super.key,
-    this.initialItem,
-  });
+  const RecurringFormSheet({super.key, this.initialItem, required this.goals});
 
   final RecurringAllocation? initialItem;
+  final List<FinancialGoal> goals;
 
   @override
   State<RecurringFormSheet> createState() => _RecurringFormSheetState();
@@ -21,6 +20,7 @@ class _RecurringFormSheetState extends State<RecurringFormSheet> {
   late final TextEditingController amountController;
   String category = 'Investing';
   String schedule = 'Monthly';
+  String? linkedGoalId;
   late int selectedMonth;
   late int selectedYear;
 
@@ -34,6 +34,9 @@ class _RecurringFormSheetState extends State<RecurringFormSheet> {
     );
     category = initial?.category ?? 'Investing';
     schedule = initial?.schedule ?? 'Monthly';
+    linkedGoalId = (initial?.linkedGoalId?.isNotEmpty ?? false)
+        ? initial?.linkedGoalId
+        : null;
     selectedMonth = initial?.endDate?.month ?? DateTime.now().month;
     selectedYear = initial?.endDate?.year ?? DateTime.now().year;
   }
@@ -47,44 +50,87 @@ class _RecurringFormSheetState extends State<RecurringFormSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final isEditing = widget.initialItem != null;
 
     return AppSheet(
-      title: isEditing ? 'Edit Automatic Spending' : 'Add Automatic Spending',
-      helpTitle: 'Automatic Spending',
-      helpLines: const [
-        'Use recurring allocations for money that is intentionally moved every month.',
-        'Examples: investing, charity, savings, rent, subscriptions, or fixed bills.',
+      title: isEditing
+          ? (t.isHebrew ? 'ערוך הוצאה אוטומטית' : 'Edit Automatic Spending')
+          : (t.isHebrew ? 'הוסף הוצאה אוטומטית' : 'Add Automatic Spending'),
+      helpTitle: t.isHebrew ? 'הוצאה אוטומטית' : 'Automatic Spending',
+      helpLines: [
+        t.isHebrew
+            ? 'השתמש בהקצאות חוזרות לכסף שיוצא או עובר בכל חודש.'
+            : 'Use recurring allocations for money intentionally moved every month.',
+        t.isHebrew
+            ? 'אפשר גם לקשר את ההקצאה ליעד כדי לעדכן את החיסכון שם אוטומטית.'
+            : 'You can also link the allocation to a goal so the goal updates automatically.',
       ],
       child: Column(
         children: [
           TextField(
             controller: nameController,
-            decoration: const InputDecoration(labelText: 'Name'),
+            decoration: InputDecoration(labelText: t.text('name')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Amount'),
+            decoration: InputDecoration(labelText: t.text('amount')),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             value: category,
-            items: const ['Investing', 'Charity', 'Bills', 'Savings', 'Loan', 'Other']
-                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-                .toList(),
+            items:
+                const [
+                      'Investing',
+                      'Charity',
+                      'Bills',
+                      'Savings',
+                      'Loan',
+                      'Other',
+                    ]
+                    .map(
+                      (item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(t.recurringCategoryLabel(item)),
+                      ),
+                    )
+                    .toList(),
             onChanged: (value) => setState(() => category = value!),
-            decoration: const InputDecoration(labelText: 'Category'),
+            decoration: InputDecoration(labelText: t.text('category')),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             value: schedule,
             items: const ['Monthly', 'Weekly', 'Yearly']
-                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(t.scheduleLabel(item)),
+                  ),
+                )
                 .toList(),
             onChanged: (value) => setState(() => schedule = value!),
-            decoration: const InputDecoration(labelText: 'Schedule'),
+            decoration: InputDecoration(labelText: t.text('schedule')),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String?>(
+            value: linkedGoalId,
+            items: [
+              DropdownMenuItem<String?>(
+                value: null,
+                child: Text(t.text('no_goal_link')),
+              ),
+              ...widget.goals.map(
+                (goal) => DropdownMenuItem<String?>(
+                  value: goal.id,
+                  child: Text(goal.name),
+                ),
+              ),
+            ],
+            onChanged: (value) => setState(() => linkedGoalId = value),
+            decoration: InputDecoration(labelText: t.text('goal_link')),
           ),
           if (category == 'Loan') ...[
             const SizedBox(height: 12),
@@ -100,8 +146,11 @@ class _RecurringFormSheetState extends State<RecurringFormSheet> {
                         child: Text((index + 1).toString().padLeft(2, '0')),
                       ),
                     ),
-                    onChanged: (value) => setState(() => selectedMonth = value!),
-                    decoration: const InputDecoration(labelText: 'Until month'),
+                    onChanged: (value) =>
+                        setState(() => selectedMonth = value!),
+                    decoration: InputDecoration(
+                      labelText: t.text('until_month'),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -116,7 +165,9 @@ class _RecurringFormSheetState extends State<RecurringFormSheet> {
                       ),
                     ),
                     onChanged: (value) => setState(() => selectedYear = value!),
-                    decoration: const InputDecoration(labelText: 'Until year'),
+                    decoration: InputDecoration(
+                      labelText: t.text('until_year'),
+                    ),
                   ),
                 ),
               ],
@@ -125,7 +176,9 @@ class _RecurringFormSheetState extends State<RecurringFormSheet> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Loan payments will be marked until ${formatMonthYear(DateTime(selectedYear, selectedMonth))}.',
+                t.isHebrew
+                    ? 'תשלומי ההלוואה יסומנו עד ${formatMonthYear(DateTime(selectedYear, selectedMonth))}.'
+                    : 'Loan payments will be marked until ${formatMonthYear(DateTime(selectedYear, selectedMonth))}.',
                 style: const TextStyle(color: Colors.black54),
               ),
             ),
@@ -136,10 +189,16 @@ class _RecurringFormSheetState extends State<RecurringFormSheet> {
             child: FilledButton(
               onPressed: () {
                 final amount = double.tryParse(amountController.text);
-                if (amount == null || amount <= 0 || nameController.text.trim().isEmpty) {
+                if (amount == null ||
+                    amount <= 0 ||
+                    nameController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Enter an allocation name and an amount greater than zero.'),
+                    SnackBar(
+                      content: Text(
+                        t.isHebrew
+                            ? 'הכנס שם הקצאה וסכום גדול מאפס.'
+                            : 'Enter an allocation name and an amount greater than zero.',
+                      ),
                     ),
                   );
                   return;
@@ -157,10 +216,13 @@ class _RecurringFormSheetState extends State<RecurringFormSheet> {
                         ? DateTime(selectedYear, selectedMonth)
                         : null,
                     lastAppliedMonth: widget.initialItem?.lastAppliedMonth,
+                    linkedGoalId: linkedGoalId,
                   ),
                 );
               },
-              child: Text(isEditing ? 'Save Changes' : 'Save Allocation'),
+              child: Text(
+                isEditing ? t.saveChanges : t.text('save_allocation'),
+              ),
             ),
           ),
         ],

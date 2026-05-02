@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
 import '../../../models/budget_models.dart';
 import '../../shared/expense_categories.dart';
 import '../../shared/widgets/cards.dart';
@@ -47,9 +48,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final query = searchController.text.trim().toLowerCase();
     final filtered = widget.expenses.where((expense) {
-      final matchesQuery = query.isEmpty ||
+      final matchesQuery =
+          query.isEmpty ||
           expense.title.toLowerCase().contains(query) ||
           expense.note.toLowerCase().contains(query) ||
           expense.account.toLowerCase().contains(query);
@@ -63,28 +66,29 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         padding: const EdgeInsets.all(20),
         children: [
           ScreenHeader(
-            title: 'Expenses',
-            subtitle: 'Track payments, search old entries, and manage categories for this budget.',
-            helpTitle: 'Expenses Help',
-            helpLines: const [
-              'Add every payment here so the dashboard and reports stay accurate.',
-              'Search by name or note. Filter by category to inspect spending patterns.',
-              'Use the three-dot menu on each payment to edit or delete it.',
-              'Everything here belongs to the current login account budget.',
+            title: t.text('expenses'),
+            subtitle: t.isHebrew
+                ? 'עקוב אחרי תשלומים, חפש רשומות ישנות וסנן לפי קטגוריה.'
+                : 'Track payments, search old entries, and manage categories for this budget.',
+            helpTitle: t.isHebrew ? 'עזרה להוצאות' : 'Expenses Help',
+            helpLines: [
+              t.isHebrew
+                  ? 'הוסף כאן כל תשלום כדי שהדשבורד והדוחות יהיו מדויקים.'
+                  : 'Add every payment here so the dashboard and reports stay accurate.',
             ],
             action: FilledButton.icon(
               onPressed: _openExpenseSheet,
               icon: const Icon(Icons.add_rounded),
-              label: const Text('Add Payment'),
+              label: Text(t.text('add_payment')),
             ),
           ),
           const SizedBox(height: 20),
           TextField(
             controller: searchController,
             onChanged: (_) => setState(() {}),
-            decoration: const InputDecoration(
-              labelText: 'Search payments',
-              prefixIcon: Icon(Icons.search_rounded),
+            decoration: InputDecoration(
+              labelText: t.text('search_payments'),
+              prefixIcon: const Icon(Icons.search_rounded),
             ),
           ),
           const SizedBox(height: 12),
@@ -94,7 +98,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               scrollDirection: Axis.horizontal,
               children: [
                 ChoiceChip(
-                  label: const Text('All'),
+                  label: Text(t.text('all')),
                   selected: selectedCategory == 'All',
                   onSelected: (_) => setState(() => selectedCategory = 'All'),
                 ),
@@ -103,9 +107,10 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   (item) => Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
-                      label: Text(item.label),
+                      label: Text(t.categoryLabel(item.label)),
                       selected: selectedCategory == item.label,
-                      onSelected: (_) => setState(() => selectedCategory = item.label),
+                      onSelected: (_) =>
+                          setState(() => selectedCategory = item.label),
                     ),
                   ),
                 ),
@@ -116,18 +121,23 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           if (widget.expenses.isEmpty)
             EmptyStateCard(
               icon: Icons.receipt_long_rounded,
-              title: 'No payments yet',
-              subtitle:
-                  'Start logging what you spend so the app can show patterns and real budget progress.',
-              actionLabel: 'Add First Payment',
+              title: t.isHebrew ? 'עדיין אין תשלומים' : 'No payments yet',
+              subtitle: t.isHebrew
+                  ? 'התחל לרשום הוצאות כדי לראות דפוסים והתקדמות אמיתית.'
+                  : 'Start logging what you spend so the app can show patterns and real budget progress.',
+              actionLabel: t.isHebrew
+                  ? 'הוסף תשלום ראשון'
+                  : 'Add First Payment',
               onTap: _openExpenseSheet,
             )
           else if (filtered.isEmpty)
             EmptyStateCard(
               icon: Icons.filter_alt_off_rounded,
-              title: 'No matching payments',
-              subtitle: 'Try a different search term or category filter.',
-              actionLabel: 'Nothing to open',
+              title: t.isHebrew ? 'אין תשלומים תואמים' : 'No matching payments',
+              subtitle: t.isHebrew
+                  ? 'נסה חיפוש או סינון אחרים.'
+                  : 'Try a different search term or category filter.',
+              actionLabel: t.close,
               onTap: _noop,
             )
           else

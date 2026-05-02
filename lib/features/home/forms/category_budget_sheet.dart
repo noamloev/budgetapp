@@ -4,10 +4,7 @@ import '../../shared/expense_categories.dart';
 import '../../shared/widgets/app_sheet.dart';
 
 class CategoryBudgetSheet extends StatefulWidget {
-  const CategoryBudgetSheet({
-    super.key,
-    required this.initialBudgets,
-  });
+  const CategoryBudgetSheet({super.key, required this.initialBudgets});
 
   final Map<String, double> initialBudgets;
 
@@ -53,7 +50,9 @@ class _CategoryBudgetSheetState extends State<CategoryBudgetSheet> {
               padding: const EdgeInsets.only(bottom: 12),
               child: TextField(
                 controller: controllers[category.label],
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 decoration: InputDecoration(labelText: category.label),
               ),
             ),
@@ -72,7 +71,9 @@ class _CategoryBudgetSheetState extends State<CategoryBudgetSheet> {
                   final amount = double.tryParse(text);
                   if (amount == null || amount <= 0) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Invalid budget for ${entry.key}.')),
+                      SnackBar(
+                        content: Text('Invalid budget for ${entry.key}.'),
+                      ),
                     );
                     return;
                   }

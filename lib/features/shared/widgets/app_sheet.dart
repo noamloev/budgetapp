@@ -39,10 +39,7 @@ class AppSheet extends StatelessWidget {
                   ),
                 ),
                 if (helpTitle != null && helpLines != null)
-                  HelpIconButton(
-                    title: helpTitle!,
-                    lines: helpLines!,
-                  ),
+                  HelpIconButton(title: helpTitle!, lines: helpLines!),
               ],
             ),
             const SizedBox(height: 16),

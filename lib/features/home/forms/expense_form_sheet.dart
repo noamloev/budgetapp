@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
 import '../../../models/budget_models.dart';
 import '../../shared/expense_categories.dart';
 import '../../shared/widgets/app_sheet.dart';
 
 class ExpenseFormSheet extends StatefulWidget {
-  const ExpenseFormSheet({
-    super.key,
-    this.initialExpense,
-  });
+  const ExpenseFormSheet({super.key, this.initialExpense});
 
   final Expense? initialExpense;
 
@@ -46,50 +44,64 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final isEditing = widget.initialExpense != null;
 
     return AppSheet(
-      title: isEditing ? 'Edit Payment' : 'Add Payment',
-      helpTitle: 'Payments',
-      helpLines: const [
-        'Use this form to log a purchase or update one you already saved.',
-        'Category helps reports. Payment method helps you understand how money moved.',
+      title: isEditing
+          ? (t.isHebrew ? 'ערוך תשלום' : 'Edit Payment')
+          : (t.text('add_payment')),
+      helpTitle: t.isHebrew ? 'תשלומים' : 'Payments',
+      helpLines: [
+        t.isHebrew
+            ? 'השתמש בטופס הזה כדי לשמור קניה או לעדכן קניה שכבר נשמרה.'
+            : 'Use this form to log a purchase or update one you already saved.',
       ],
       child: Column(
         children: [
           TextField(
             controller: titleController,
-            decoration: const InputDecoration(labelText: 'What did you pay for?'),
+            decoration: InputDecoration(labelText: t.text('what_paid_for')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Amount'),
+            decoration: InputDecoration(labelText: t.text('amount')),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             value: category,
             items: ExpenseCategory.values
-                .map((item) => DropdownMenuItem(value: item.label, child: Text(item.label)))
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item.label,
+                    child: Text(t.categoryLabel(item.label)),
+                  ),
+                )
                 .toList(),
             onChanged: (value) => setState(() => category = value!),
-            decoration: const InputDecoration(labelText: 'Category'),
+            decoration: InputDecoration(labelText: t.text('category')),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             value: paymentMethod,
             items: const ['Card', 'Cash', 'Bank Transfer', 'Digital Wallet']
-                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+                .map(
+                  (item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(t.paymentMethodLabel(item)),
+                  ),
+                )
                 .toList(),
             onChanged: (value) => setState(() => paymentMethod = value!),
-            decoration: const InputDecoration(labelText: 'Payment Method'),
+            decoration: InputDecoration(labelText: t.text('payment_method')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: noteController,
             maxLines: 2,
-            decoration: const InputDecoration(labelText: 'Note'),
+            decoration: InputDecoration(labelText: t.text('note')),
           ),
           const SizedBox(height: 18),
           SizedBox(
@@ -97,10 +109,16 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
             child: FilledButton(
               onPressed: () {
                 final amount = double.tryParse(amountController.text);
-                if (amount == null || amount <= 0 || titleController.text.trim().isEmpty) {
+                if (amount == null ||
+                    amount <= 0 ||
+                    titleController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Enter a payment name and an amount greater than zero.'),
+                    SnackBar(
+                      content: Text(
+                        t.isHebrew
+                            ? 'הכנס שם תשלום וסכום גדול מאפס.'
+                            : 'Enter a payment name and an amount greater than zero.',
+                      ),
                     ),
                   );
                   return;
@@ -120,7 +138,7 @@ class _ExpenseFormSheetState extends State<ExpenseFormSheet> {
                   ),
                 );
               },
-              child: Text(isEditing ? 'Save Changes' : 'Save Payment'),
+              child: Text(isEditing ? t.saveChanges : t.text('save_payment')),
             ),
           ),
         ],

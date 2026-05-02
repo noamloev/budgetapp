@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
 import '../../../models/budget_models.dart';
 import '../../shared/widgets/app_sheet.dart';
 
 class IncomeFormSheet extends StatefulWidget {
-  const IncomeFormSheet({
-    super.key,
-    this.initialIncome,
-  });
+  const IncomeFormSheet({super.key, this.initialIncome});
 
   final IncomeEntry? initialIncome;
 
@@ -24,7 +22,9 @@ class _IncomeFormSheetState extends State<IncomeFormSheet> {
   void initState() {
     super.initState();
     final initial = widget.initialIncome;
-    contributorController = TextEditingController(text: initial?.contributor ?? '');
+    contributorController = TextEditingController(
+      text: initial?.contributor ?? '',
+    );
     titleController = TextEditingController(text: initial?.title ?? '');
     amountController = TextEditingController(
       text: initial == null ? '' : initial.amount.toStringAsFixed(0),
@@ -41,31 +41,35 @@ class _IncomeFormSheetState extends State<IncomeFormSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final isEditing = widget.initialIncome != null;
 
     return AppSheet(
-      title: isEditing ? 'Edit Income' : 'Add Income',
-      helpTitle: 'Income Entry',
-      helpLines: const [
-        'Use this for actual monthly income added by one person or the other.',
-        'Contributor can be a partner name, and title can be salary, freelance, refund, or bonus.',
+      title: isEditing
+          ? (t.isHebrew ? 'ערוך הכנסה' : 'Edit Income')
+          : t.text('add_income'),
+      helpTitle: t.isHebrew ? 'רישום הכנסה' : 'Income Entry',
+      helpLines: [
+        t.isHebrew
+            ? 'השתמש בזה להכנסה חודשית אמיתית שנכנסה לחשבון.'
+            : 'Use this for actual monthly income added by one person or the other.',
       ],
       child: Column(
         children: [
           TextField(
             controller: contributorController,
-            decoration: const InputDecoration(labelText: 'Who added it?'),
+            decoration: InputDecoration(labelText: t.text('who_added_it')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: titleController,
-            decoration: const InputDecoration(labelText: 'Title'),
+            decoration: InputDecoration(labelText: t.text('title')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Amount'),
+            decoration: InputDecoration(labelText: t.text('amount')),
           ),
           const SizedBox(height: 18),
           SizedBox(
@@ -78,8 +82,12 @@ class _IncomeFormSheetState extends State<IncomeFormSheet> {
                     amount == null ||
                     amount <= 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Enter contributor, title, and an amount greater than zero.'),
+                    SnackBar(
+                      content: Text(
+                        t.isHebrew
+                            ? 'הכנס מי הוסיף, כותרת וסכום גדול מאפס.'
+                            : 'Enter contributor, title, and an amount greater than zero.',
+                      ),
                     ),
                   );
                   return;
@@ -96,7 +104,7 @@ class _IncomeFormSheetState extends State<IncomeFormSheet> {
                   ),
                 );
               },
-              child: Text(isEditing ? 'Save Changes' : 'Save Income'),
+              child: Text(isEditing ? t.saveChanges : t.text('save_income')),
             ),
           ),
         ],

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
 import '../../../models/budget_models.dart';
 import '../../shared/widgets/app_sheet.dart';
 
 class BudgetSettingsSheet extends StatefulWidget {
-  const BudgetSettingsSheet({
-    super.key,
-    required this.data,
-  });
+  const BudgetSettingsSheet({super.key, required this.data});
 
   final BudgetData data;
 
@@ -23,10 +21,12 @@ class _BudgetSettingsSheetState extends State<BudgetSettingsSheet> {
   @override
   void initState() {
     super.initState();
-    incomeController =
-        TextEditingController(text: widget.data.monthlyIncome.toStringAsFixed(0));
-    taxController =
-        TextEditingController(text: widget.data.monthlyTax.toStringAsFixed(0));
+    incomeController = TextEditingController(
+      text: widget.data.monthlyIncome.toStringAsFixed(0),
+    );
+    taxController = TextEditingController(
+      text: widget.data.monthlyTax.toStringAsFixed(0),
+    );
     goalController = TextEditingController(
       text: widget.data.monthlySpendingGoal.toStringAsFixed(0),
     );
@@ -42,32 +42,41 @@ class _BudgetSettingsSheetState extends State<BudgetSettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     return AppSheet(
-      title: 'Edit Budget Numbers',
-      helpTitle: 'Budget Numbers',
-      helpLines: const [
-        'Income is your gross monthly income.',
-        'Tax is what is removed before money is usable.',
-        'Monthly spending goal is the limit you want to stay under.',
+      title: t.isHebrew ? 'ערוך נתוני תקציב' : 'Edit Budget Numbers',
+      helpTitle: t.isHebrew ? 'נתוני תקציב' : 'Budget Numbers',
+      helpLines: [
+        t.isHebrew
+            ? 'הכנסה היא ההכנסה החודשית לפני ניכויים.'
+            : 'Income is your gross monthly income.',
+        t.isHebrew
+            ? 'מס הוא מה שיורד לפני שהכסף זמין.'
+            : 'Tax is what is removed before money is usable.',
+        t.isHebrew
+            ? 'יעד הוצאה חודשי הוא התקרה שאתה רוצה לשמור מתחתיה.'
+            : 'Monthly spending goal is the limit you want to stay under.',
       ],
       child: Column(
         children: [
           TextField(
             controller: incomeController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Monthly income'),
+            decoration: InputDecoration(labelText: t.text('monthly_income')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: taxController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Monthly tax'),
+            decoration: InputDecoration(labelText: t.text('monthly_tax')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: goalController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Monthly spending goal'),
+            decoration: InputDecoration(
+              labelText: t.text('monthly_spending_goal'),
+            ),
           ),
           const SizedBox(height: 18),
           SizedBox(
@@ -84,9 +93,11 @@ class _BudgetSettingsSheetState extends State<BudgetSettingsSheet> {
                     goal == null ||
                     goal <= 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text(
-                        'Enter valid positive numbers for income and monthly goal.',
+                        t.isHebrew
+                            ? 'הכנס מספרים חיוביים תקינים להכנסה וליעד החודשי.'
+                            : 'Enter valid positive numbers for income and monthly goal.',
                       ),
                     ),
                   );
@@ -94,8 +105,12 @@ class _BudgetSettingsSheetState extends State<BudgetSettingsSheet> {
                 }
                 if (tax > income) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Tax cannot be higher than income.'),
+                    SnackBar(
+                      content: Text(
+                        t.isHebrew
+                            ? 'המס לא יכול להיות גבוה מההכנסה.'
+                            : 'Tax cannot be higher than income.',
+                      ),
                     ),
                   );
                   return;
@@ -110,7 +125,7 @@ class _BudgetSettingsSheetState extends State<BudgetSettingsSheet> {
                   ),
                 );
               },
-              child: const Text('Save Numbers'),
+              child: Text(t.text('save_numbers')),
             ),
           ),
         ],

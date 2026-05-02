@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
 import '../../../models/budget_models.dart';
 import '../../shared/budget_cycle.dart';
 import '../../shared/formatters.dart';
@@ -30,7 +31,8 @@ class PlanningScreen extends StatelessWidget {
     required double monthlyIncome,
     required double monthlyTax,
     required double monthlyGoal,
-  }) onUpdateBudgetSettings;
+  })
+  onUpdateBudgetSettings;
   final ValueChanged<Map<String, double>> onUpdateCategoryBudgets;
   final ValueChanged<RecurringAllocation> onUpsertRecurring;
   final ValueChanged<String> onDeleteRecurring;
@@ -66,12 +68,15 @@ class PlanningScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _openRecurring(BuildContext context, [RecurringAllocation? item]) async {
+  Future<void> _openRecurring(
+    BuildContext context, [
+    RecurringAllocation? item,
+  ]) async {
     final result = await showModalBottomSheet<RecurringAllocation>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => RecurringFormSheet(initialItem: item),
+      builder: (_) => RecurringFormSheet(initialItem: item, goals: data.goals),
     );
     if (result != null) {
       onUpsertRecurring(result);
@@ -90,7 +95,10 @@ class PlanningScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _openContribution(BuildContext context, FinancialGoal goal) async {
+  Future<void> _openContribution(
+    BuildContext context,
+    FinancialGoal goal,
+  ) async {
     final amount = await showModalBottomSheet<double>(
       context: context,
       isScrollControlled: true,
@@ -104,6 +112,7 @@ class PlanningScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final currentCycle = cycleForDate(DateTime.now(), data.budgetCycleStartDay);
 
     return SafeArea(
@@ -111,14 +120,18 @@ class PlanningScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         children: [
           ScreenHeader(
-            title: 'Planning',
-            subtitle: 'Manage your core budget, category limits, recurring money moves, and long-term goals.',
-            helpTitle: 'Planning Help',
-            helpLines: const [
-              'Edit your monthly numbers here when income, tax, or your spending target changes.',
-              'Category budgets help you spot overspending earlier.',
-              'Recurring items and goals can both be edited from their menus.',
-              'The billing cycle day lives in Settings and decides when a new budget month starts.',
+            title: t.text('plan'),
+            subtitle: t.isHebrew
+                ? 'נהל את המספרים המרכזיים, תקציבי הקטגוריות, ההוצאות האוטומטיות והיעדים.'
+                : 'Manage your core budget, category limits, recurring money moves, and long-term goals.',
+            helpTitle: t.isHebrew ? 'עזרה לתכנון' : 'Planning Help',
+            helpLines: [
+              t.isHebrew
+                  ? 'ערוך כאן את ההכנסה, המס והיעד החודשי.'
+                  : 'Edit your monthly numbers here when income, tax, or your spending target changes.',
+              t.isHebrew
+                  ? 'אפשר לערוך גם תקציבי קטגוריות, הקצאות חוזרות ויעדים.'
+                  : 'Category budgets, recurring items, and goals can all be managed here.',
             ],
           ),
           const SizedBox(height: 20),
@@ -134,11 +147,13 @@ class PlanningScreen extends StatelessWidget {
                 children: [
                   OutlinedButton(
                     onPressed: () => _openBudgetSheet(context),
-                    child: const Text('Edit Numbers'),
+                    child: Text(t.isHebrew ? 'ערוך נתונים' : 'Edit Numbers'),
                   ),
                   OutlinedButton(
                     onPressed: () => _openCategoryBudgets(context),
-                    child: const Text('Category Budgets'),
+                    child: Text(
+                      t.isHebrew ? 'תקציבי קטגוריות' : 'Category Budgets',
+                    ),
                   ),
                 ],
               ),
@@ -146,46 +161,49 @@ class PlanningScreen extends StatelessWidget {
           ),
           if (data.categoryBudgets.isNotEmpty) ...[
             const SizedBox(height: 16),
-            ...data.categoryBudgets.entries.map(
-              (entry) {
-                final spent = data.expenses
-                    .where((expense) => expense.category == entry.key)
-                    .fold<double>(0, (sum, expense) => sum + expense.amount);
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: InfoCard(
-                    title: entry.key,
-                    value: '${money(spent)} / ${money(entry.value)}',
-                    subtitle: spent > entry.value
-                        ? 'Over budget by ${money(spent - entry.value)}'
-                        : 'Remaining ${money(entry.value - spent)}',
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: LinearProgressIndicator(
-                        value: entry.value <= 0 ? 0 : (spent / entry.value).clamp(0.0, 1.0),
-                        minHeight: 10,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
+            ...data.categoryBudgets.entries.map((entry) {
+              final spent = data.expenses
+                  .where((expense) => expense.category == entry.key)
+                  .fold<double>(0, (sum, expense) => sum + expense.amount);
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: InfoCard(
+                  title: entry.key,
+                  value: '${money(spent)} / ${money(entry.value)}',
+                  subtitle: spent > entry.value
+                      ? 'Over budget by ${money(spent - entry.value)}'
+                      : 'Remaining ${money(entry.value - spent)}',
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: LinearProgressIndicator(
+                      value: entry.value <= 0
+                          ? 0
+                          : (spent / entry.value).clamp(0.0, 1.0),
+                      minHeight: 10,
+                      borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            }),
           ],
           const SizedBox(height: 20),
           SectionHeader(
             title: 'Automatic Spending',
-            actionLabel: 'Add',
+            actionLabel: t.add,
             onTap: () => _openRecurring(context),
           ),
           const SizedBox(height: 12),
           if (data.recurringAllocations.isEmpty)
             EmptyStateCard(
               icon: Icons.autorenew_rounded,
-              title: 'No automatic spending yet',
-              subtitle:
-                  'Add investing, charity, savings, or bills so your monthly plan reflects real life.',
-              actionLabel: 'Add Allocation',
+              title: t.isHebrew
+                  ? 'עדיין אין הוצאות אוטומטיות'
+                  : 'No automatic spending yet',
+              subtitle: t.isHebrew
+                  ? 'הוסף השקעות, תרומות, חיסכון או חשבונות כדי שהתכנון ישקף את המציאות.'
+                  : 'Add investing, charity, savings, or bills so your monthly plan reflects real life.',
+              actionLabel: t.text('add_allocation'),
               onTap: () => _openRecurring(context),
             )
           else
@@ -195,8 +213,8 @@ class PlanningScreen extends StatelessWidget {
                 child: InfoRowCard(
                   title: item.name,
                   subtitle: item.category == 'Loan' && item.endDate != null
-                      ? '${item.category} - ${item.schedule} - until ${formatMonthYear(item.endDate!)}'
-                      : '${item.category} - ${item.schedule}',
+                      ? '${t.recurringCategoryLabel(item.category)} - ${t.scheduleLabel(item.schedule)} - ${t.isHebrew ? 'עד' : 'until'} ${formatMonthYear(item.endDate!)}'
+                      : '${t.recurringCategoryLabel(item.category)} - ${t.scheduleLabel(item.schedule)}${item.linkedGoalId == null || item.linkedGoalId!.isEmpty ? '' : ' - ${t.text('goal_link')}'}',
                   trailing: money(item.amount),
                   onEdit: () => _openRecurring(context, item),
                   onDelete: () => onDeleteRecurring(item.id),
@@ -206,17 +224,18 @@ class PlanningScreen extends StatelessWidget {
           const SizedBox(height: 20),
           SectionHeader(
             title: 'Goals & Dreams',
-            actionLabel: 'Add',
+            actionLabel: t.add,
             onTap: () => _openGoal(context),
           ),
           const SizedBox(height: 12),
           if (data.goals.isEmpty)
             EmptyStateCard(
               icon: Icons.flag_rounded,
-              title: 'No goals yet',
-              subtitle:
-                  'Add a trip, emergency fund, car, home, or another dream so your budget stays connected to something meaningful.',
-              actionLabel: 'Add Goal',
+              title: t.isHebrew ? 'עדיין אין יעדים' : 'No goals yet',
+              subtitle: t.isHebrew
+                  ? 'הוסף טיול, קרן חירום, רכב, דירה או כל יעד אחר.'
+                  : 'Add a trip, emergency fund, car, home, or another dream so your budget stays connected to something meaningful.',
+              actionLabel: t.text('add_goal'),
               onTap: () => _openGoal(context),
             )
           else

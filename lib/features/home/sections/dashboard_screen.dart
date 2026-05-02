@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
+import '../../../data/budget_engine.dart';
 import '../../../models/budget_models.dart';
 import '../../shared/budget_cycle.dart';
 import '../../shared/formatters.dart';
@@ -23,18 +25,22 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     if (!data.hasBudgetSetup) {
       return SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
             ScreenHeader(
-              title: 'Dashboard',
-              subtitle: 'This is the main money overview screen.',
-              helpTitle: 'Dashboard Help',
-              helpLines: const [
-                'The dashboard shows your net income, budget progress, recent payments, and category trends.',
-                'You need core budget numbers first before these widgets can become useful.',
+              title: t.text('dashboard'),
+              subtitle: t.isHebrew
+                  ? 'התמונה הראשית של הכסף, ההוצאות וההתקדמות שלך.'
+                  : 'This is the main money overview screen.',
+              helpTitle: t.isHebrew ? 'עזרה לדשבורד' : 'Dashboard Help',
+              helpLines: [
+                t.isHebrew
+                    ? 'כאן רואים הכנסה, הוצאות, יתרה, מניות ויעדים.'
+                    : 'The dashboard shows your net income, budget progress, recent payments, and category trends.',
               ],
             ),
             const SizedBox(height: 20),
@@ -52,15 +58,16 @@ class DashboardScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Start Your Budget',
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineMedium
-                        ?.copyWith(color: Colors.white),
+                    t.isHebrew ? 'התחל את התקציב' : 'Start Your Budget',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineMedium?.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
-                    'Add your monthly income, tax, and spending goal first. Then you can track payments, recurring allocations, and future dreams.',
+                  Text(
+                    t.isHebrew
+                        ? 'הוסף קודם הכנסה חודשית, מס ויעד הוצאה. אחר כך תוכל לעקוב אחרי תשלומים, הקצאות חוזרות ויעדים.'
+                        : 'Add your monthly income, tax, and spending goal first. Then you can track payments, recurring allocations, and future dreams.',
                     style: TextStyle(color: Colors.white70, height: 1.45),
                   ),
                   const SizedBox(height: 20),
@@ -70,7 +77,9 @@ class DashboardScreen extends StatelessWidget {
                       backgroundColor: Colors.white,
                       foregroundColor: const Color(0xFF115E59),
                     ),
-                    child: const Text('Fill Important Data'),
+                    child: Text(
+                      t.isHebrew ? 'מלא נתונים חשובים' : 'Fill Important Data',
+                    ),
                   ),
                 ],
               ),
@@ -84,20 +93,27 @@ class DashboardScreen extends StatelessWidget {
     final incomeAfterTax = data.monthlyIncome - data.monthlyTax;
     final spent = cycleExpenseTotal(data.expenses, currentCycle);
     final recurring = data.totalRecurring;
+    final openingBalance = currentCycleOpeningBalance(data, DateTime.now());
     final incomeThisMonth = data.incomeEntries
         .where((item) => currentCycle.contains(item.date))
         .fold<double>(0, (sum, item) => sum + item.amount);
     final totalUsableIncome = incomeAfterTax + incomeThisMonth;
-    final freeToUse = totalUsableIncome - spent - recurring;
-    final goalProgress =
-        data.monthlySpendingGoal <= 0 ? 0.0 : (spent / data.monthlySpendingGoal).clamp(0.0, 1.0);
-    final dailySafeSpend =
-        (((data.monthlySpendingGoal - spent) / 10).clamp(0.0, double.infinity)).toDouble();
+    final freeToUse = openingBalance + totalUsableIncome - spent - recurring;
+    final portfolioBalance = currentCycleBalance(data, DateTime.now());
+    final goalProgress = data.monthlySpendingGoal <= 0
+        ? 0.0
+        : (spent / data.monthlySpendingGoal).clamp(0.0, 1.0);
+    final dailySafeSpend = (((data.monthlySpendingGoal - spent) / 10).clamp(
+      0.0,
+      double.infinity,
+    )).toDouble();
     final charity = data.recurringAllocations
         .where((item) => item.category == 'Charity')
         .fold<double>(0, (sum, item) => sum + item.amount);
     final spentByCategory = <String, double>{};
-    for (final expense in data.expenses.where((item) => currentCycle.contains(item.date))) {
+    for (final expense in data.expenses.where(
+      (item) => currentCycle.contains(item.date),
+    )) {
       spentByCategory.update(
         expense.category,
         (value) => value + expense.amount,
@@ -109,8 +125,12 @@ class DashboardScreen extends StatelessWidget {
         ..sort((a, b) => b.value.compareTo(a.value)),
     );
     final reviewText = spent <= data.monthlySpendingGoal
-        ? 'You are inside your monthly target by ${money(data.monthlySpendingGoal - spent)}.'
-        : 'You are above your monthly target by ${money(spent - data.monthlySpendingGoal)}.';
+        ? (t.isHebrew
+              ? 'אתה בתוך היעד החודשי ב-${money(data.monthlySpendingGoal - spent)}.'
+              : 'You are inside your monthly target by ${money(data.monthlySpendingGoal - spent)}.')
+        : (t.isHebrew
+              ? 'אתה מעל היעד החודשי ב-${money(spent - data.monthlySpendingGoal)}.'
+              : 'You are above your monthly target by ${money(spent - data.monthlySpendingGoal)}.');
 
     Future<void> openIncome([IncomeEntry? income]) async {
       final result = await showModalBottomSheet<IncomeEntry>(
@@ -130,7 +150,8 @@ class DashboardScreen extends StatelessWidget {
         children: [
           ScreenHeader(
             title: 'Dashboard',
-            subtitle: 'Your main overview of income, spending, savings behavior, and progress.',
+            subtitle:
+                'Your main overview of income, spending, savings behavior, and progress.',
             helpTitle: 'Dashboard Help',
             helpLines: const [
               'Net Income is income after tax.',
@@ -143,7 +164,7 @@ class DashboardScreen extends StatelessWidget {
             action: FilledButton.icon(
               onPressed: () => openIncome(),
               icon: const Icon(Icons.add_rounded),
-              label: const Text('Add Income'),
+              label: Text(t.text('add_income')),
             ),
           ),
           const SizedBox(height: 20),
@@ -162,14 +183,15 @@ class DashboardScreen extends StatelessWidget {
               children: [
                 Text(
                   'Budget Flow',
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium
-                      ?.copyWith(color: Colors.white),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineMedium?.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'A clean view of income, spending, automatic allocations, and long-term goals.',
+                Text(
+                  t.isHebrew
+                      ? 'מבט נקי על הכנסות, הוצאות, הקצאות אוטומטיות ויעדים ארוכי טווח.'
+                      : 'A clean view of income, spending, automatic allocations, and long-term goals.',
                   style: TextStyle(color: Colors.white70, height: 1.4),
                 ),
                 const SizedBox(height: 8),
@@ -182,8 +204,14 @@ class DashboardScreen extends StatelessWidget {
                   spacing: 12,
                   runSpacing: 12,
                   children: [
-                    SummaryChip(label: 'Net Income', value: money(incomeAfterTax)),
-                    SummaryChip(label: 'Added This Month', value: money(incomeThisMonth)),
+                    SummaryChip(
+                      label: 'Net Income',
+                      value: money(incomeAfterTax),
+                    ),
+                    SummaryChip(
+                      label: 'Added This Month',
+                      value: money(incomeThisMonth),
+                    ),
                     SummaryChip(label: 'Spent', value: money(spent)),
                     SummaryChip(label: 'Free Left', value: money(freeToUse)),
                   ],
@@ -196,10 +224,11 @@ class DashboardScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: InfoCard(
-                  title: 'Monthly Goal',
+                  title: t.isHebrew ? 'יעד חודשי' : 'Monthly Goal',
                   value: money(data.monthlySpendingGoal),
-                  subtitle:
-                      '${(goalProgress * 100).toStringAsFixed(0)}% of spending target used',
+                  subtitle: t.isHebrew
+                      ? '${(goalProgress * 100).toStringAsFixed(0)}% מיעד ההוצאה נוצל'
+                      : '${(goalProgress * 100).toStringAsFixed(0)}% of spending target used',
                   child: Padding(
                     padding: const EdgeInsets.only(top: 14),
                     child: LinearProgressIndicator(
@@ -213,9 +242,35 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(width: 14),
               Expanded(
                 child: InfoCard(
-                  title: 'Daily Safe Spend',
+                  title: t.isHebrew ? 'הוצאה יומית בטוחה' : 'Daily Safe Spend',
                   value: money(dailySafeSpend),
-                  subtitle: 'Simple runway estimate for the rest of the month',
+                  subtitle: t.isHebrew
+                      ? 'הערכת קצב פשוטה להמשך החודש'
+                      : 'Simple runway estimate for the rest of the month',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: InfoCard(
+                  title: t.text('portfolio_balance'),
+                  value: money(portfolioBalance),
+                  subtitle: t.isHebrew
+                      ? 'כולל יתרת פתיחה מהחודש הקודם'
+                      : 'Includes carried balance from the previous month',
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: InfoCard(
+                  title: t.text('stock_value'),
+                  value: money(data.totalStockValue),
+                  subtitle: t.isHebrew
+                      ? 'שווי שוק של ההחזקות'
+                      : 'Market value of holdings',
                 ),
               ),
             ],
@@ -274,7 +329,10 @@ class DashboardScreen extends StatelessWidget {
             value: money(charity),
           ),
           const SizedBox(height: 20),
-          Text('Income This Cycle', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Income This Cycle',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 12),
           if (data.incomeEntries.isEmpty)
             Container(
@@ -289,20 +347,26 @@ class DashboardScreen extends StatelessWidget {
               ),
             )
           else
-            ...data.incomeEntries.take(5).map(
-              (income) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: InfoRowCard(
-                  title: income.contributor,
-                    subtitle: '${income.title} - ${formatMonthYear(income.date)}',
-                    trailing: money(income.amount),
-                    onEdit: () => openIncome(income),
-                    onDelete: () => onDeleteIncome(income.id),
+            ...data.incomeEntries
+                .take(5)
+                .map(
+                  (income) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: InfoRowCard(
+                      title: income.contributor,
+                      subtitle:
+                          '${income.title} - ${formatMonthYear(income.date)}',
+                      trailing: money(income.amount),
+                      onEdit: () => openIncome(income),
+                      onDelete: () => onDeleteIncome(income.id),
+                    ),
+                  ),
                 ),
-              ),
-            ),
           const SizedBox(height: 20),
-          Text('Category Snapshot', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Category Snapshot',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 12),
           if (topCategories.isEmpty)
             Container(
@@ -317,7 +381,9 @@ class DashboardScreen extends StatelessWidget {
               ),
             )
           else
-            MiniBarChart(values: Map.fromEntries(topCategories.entries.take(5))),
+            MiniBarChart(
+              values: Map.fromEntries(topCategories.entries.take(5)),
+            ),
           const SizedBox(height: 20),
           Text('Monthly Review', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
@@ -336,7 +402,9 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: 20),
           Text('Past Cycles', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 12),
-          ...recentCycles(data.budgetCycleStartDay, count: 4).skip(1).map(
+          ...recentCycles(data.budgetCycleStartDay, count: 4)
+              .skip(1)
+              .map(
                 (cycle) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: InfoRowCard(
@@ -351,7 +419,10 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
           const SizedBox(height: 20),
-          Text('Recent Spending', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Recent Spending',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 12),
           if (data.expenses.isEmpty)
             Container(
@@ -366,12 +437,14 @@ class DashboardScreen extends StatelessWidget {
               ),
             )
           else
-            ...data.expenses.take(4).map(
+            ...data.expenses
+                .take(4)
+                .map(
                   (expense) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: ExpenseListTile(expense: expense),
-              ),
-            ),
+                  ),
+                ),
         ],
       ),
     );

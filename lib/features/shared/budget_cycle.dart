@@ -1,10 +1,7 @@
 import '../../models/budget_models.dart';
 
 class BudgetCyclePeriod {
-  BudgetCyclePeriod({
-    required this.start,
-    required this.endExclusive,
-  });
+  BudgetCyclePeriod({required this.start, required this.endExclusive});
 
   final DateTime start;
   final DateTime endExclusive;
@@ -25,11 +22,19 @@ DateTime _safeMonthDate(int year, int month, int day) {
 }
 
 BudgetCyclePeriod cycleForDate(DateTime date, int cycleStartDay) {
-  final currentMonthStart = _safeMonthDate(date.year, date.month, cycleStartDay);
+  final currentMonthStart = _safeMonthDate(
+    date.year,
+    date.month,
+    cycleStartDay,
+  );
   final start = date.isBefore(currentMonthStart)
       ? _safeMonthDate(date.year, date.month - 1, cycleStartDay)
       : currentMonthStart;
-  final endExclusive = _safeMonthDate(start.year, start.month + 1, cycleStartDay);
+  final endExclusive = _safeMonthDate(
+    start.year,
+    start.month + 1,
+    cycleStartDay,
+  );
   return BudgetCyclePeriod(start: start, endExclusive: endExclusive);
 }
 

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
 import '../../../models/budget_models.dart';
 import '../expense_categories.dart';
 import '../formatters.dart';
 
 class SummaryChip extends StatelessWidget {
-  const SummaryChip({
-    super.key,
-    required this.label,
-    required this.value,
-  });
+  const SummaryChip({super.key, required this.label, required this.value});
 
   final String label;
   final String value;
@@ -57,6 +54,7 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -94,6 +92,7 @@ class StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -135,6 +134,7 @@ class ExpenseListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -160,15 +160,21 @@ class ExpenseListTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(expense.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(
+                  expense.title,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
                 const SizedBox(height: 4),
                 Text(
-                  '${expense.category} - ${expense.paymentMethod}',
+                  '${t.categoryLabel(expense.category)} - ${t.paymentMethodLabel(expense.paymentMethod)}',
                   style: const TextStyle(color: Colors.black54),
                 ),
                 if (expense.note.isNotEmpty) ...[
                   const SizedBox(height: 4),
-                  Text(expense.note, style: const TextStyle(color: Colors.black45)),
+                  Text(
+                    expense.note,
+                    style: const TextStyle(color: Colors.black45),
+                  ),
                 ],
               ],
             ),
@@ -176,16 +182,19 @@ class ExpenseListTile extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(money(expense.amount), style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text(
+                money(expense.amount),
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
               if (onEdit != null || onDelete != null)
                 PopupMenuButton<String>(
                   onSelected: (value) {
                     if (value == 'edit') onEdit?.call();
                     if (value == 'delete') onDelete?.call();
                   },
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(value: 'edit', child: Text('Edit')),
-                    PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 'edit', child: Text(t.edit)),
+                    PopupMenuItem(value: 'delete', child: Text(t.delete)),
                   ],
                 ),
             ],
@@ -216,6 +225,7 @@ class InfoRowCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(22),
@@ -231,7 +241,10 @@ class InfoRowCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
                   const SizedBox(height: 4),
                   Text(subtitle, style: const TextStyle(color: Colors.black54)),
                 ],
@@ -244,9 +257,9 @@ class InfoRowCard extends StatelessWidget {
                   if (value == 'edit') onEdit?.call();
                   if (value == 'delete') onDelete?.call();
                 },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  PopupMenuItem(value: 'delete', child: Text('Delete')),
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 'edit', child: Text(t.edit)),
+                  PopupMenuItem(value: 'delete', child: Text(t.delete)),
                 ],
               ),
           ],
@@ -272,6 +285,7 @@ class GoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     final progress = (goal.currentAmount / goal.targetAmount).clamp(0.0, 1.0);
     final remaining = goal.targetAmount - goal.currentAmount;
 
@@ -290,18 +304,29 @@ class GoalCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text(goal.name, style: Theme.of(context).textTheme.titleMedium)),
-              Text(money(goal.targetAmount), style: const TextStyle(fontWeight: FontWeight.w800)),
+              Expanded(
+                child: Text(
+                  goal.name,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Text(
+                money(goal.targetAmount),
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
               PopupMenuButton<String>(
                 onSelected: (value) {
                   if (value == 'contribute') onContribute?.call();
                   if (value == 'edit') onEdit?.call();
                   if (value == 'delete') onDelete?.call();
                 },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'contribute', child: Text('Add contribution')),
-                  PopupMenuItem(value: 'edit', child: Text('Edit')),
-                  PopupMenuItem(value: 'delete', child: Text('Delete')),
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'contribute',
+                    child: Text(t.text('contribute')),
+                  ),
+                  PopupMenuItem(value: 'edit', child: Text(t.edit)),
+                  PopupMenuItem(value: 'delete', child: Text(t.delete)),
                 ],
               ),
             ],
@@ -314,7 +339,9 @@ class GoalCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            '${money(goal.currentAmount)} saved - ${money(remaining)} remaining - target ${goal.targetDate.year}',
+            t.isHebrew
+                ? '${money(goal.currentAmount)} נחסכו - ${money(remaining)} נותרו - יעד ${goal.targetDate.year}'
+                : '${money(goal.currentAmount)} saved - ${money(remaining)} remaining - target ${goal.targetDate.year}',
             style: const TextStyle(color: Colors.black54),
           ),
         ],
@@ -339,7 +366,9 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: Text(title, style: Theme.of(context).textTheme.titleLarge)),
+        Expanded(
+          child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+        ),
         TextButton(onPressed: onTap, child: Text(actionLabel)),
       ],
     );
@@ -347,16 +376,15 @@ class SectionHeader extends StatelessWidget {
 }
 
 class MiniBarChart extends StatelessWidget {
-  const MiniBarChart({
-    super.key,
-    required this.values,
-  });
+  const MiniBarChart({super.key, required this.values});
 
   final Map<String, double> values;
 
   @override
   Widget build(BuildContext context) {
-    final maxValue = values.values.isEmpty ? 1.0 : values.values.reduce((a, b) => a > b ? a : b);
+    final maxValue = values.values.isEmpty
+        ? 1.0
+        : values.values.reduce((a, b) => a > b ? a : b);
 
     return Container(
       padding: const EdgeInsets.all(18),

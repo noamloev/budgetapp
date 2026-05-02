@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
 import '../../shared/widgets/app_sheet.dart';
 
 class GoalContributionSheet extends StatefulWidget {
@@ -20,18 +21,23 @@ class _GoalContributionSheetState extends State<GoalContributionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     return AppSheet(
-      title: 'Add Contribution',
-      helpTitle: 'Goal Contribution',
-      helpLines: const [
-        'Use this to add more saved money to a goal without changing its target.',
+      title: t.text('contribute'),
+      helpTitle: t.isHebrew ? 'הפקדה ליעד' : 'Goal Contribution',
+      helpLines: [
+        t.isHebrew
+            ? 'השתמש בזה כדי להוסיף כסף שנחסך ליעד בלי לשנות את היעד עצמו.'
+            : 'Use this to add more saved money to a goal without changing its target.',
       ],
       child: Column(
         children: [
           TextField(
             controller: amountController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Contribution amount'),
+            decoration: InputDecoration(
+              labelText: t.text('contribution_amount'),
+            ),
           ),
           const SizedBox(height: 18),
           SizedBox(
@@ -41,13 +47,19 @@ class _GoalContributionSheetState extends State<GoalContributionSheet> {
                 final amount = double.tryParse(amountController.text);
                 if (amount == null || amount <= 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Enter an amount greater than zero.')),
+                    SnackBar(
+                      content: Text(
+                        t.isHebrew
+                            ? 'הכנס סכום גדול מאפס.'
+                            : 'Enter an amount greater than zero.',
+                      ),
+                    ),
                   );
                   return;
                 }
                 Navigator.pop(context, amount);
               },
-              child: const Text('Add Contribution'),
+              child: Text(t.text('contribute')),
             ),
           ),
         ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_localizations.dart';
+
 class HelpIconButton extends StatelessWidget {
   const HelpIconButton({
     super.key,
@@ -14,6 +16,7 @@ class HelpIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.t;
     return IconButton(
       onPressed: () {
         showDialog<void>(
@@ -35,14 +38,14 @@ class HelpIconButton extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Close'),
+                child: Text(t.close),
               ),
             ],
           ),
         );
       },
       icon: Icon(Icons.help_outline_rounded, color: tint),
-      tooltip: 'What does this screen do?',
+      tooltip: t.text('screen_help_tooltip'),
     );
   }
 }
@@ -79,24 +82,21 @@ class ScreenHeader extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: Theme.of(context).textTheme.headlineMedium),
+                      Text(
+                        title,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
                       const SizedBox(height: 8),
                       Text(subtitle),
                     ],
                   ),
                 ),
-                HelpIconButton(
-                  title: helpTitle,
-                  lines: helpLines,
-                ),
+                HelpIconButton(title: helpTitle, lines: helpLines),
               ],
             ),
             if (action != null) ...[
               SizedBox(height: compact ? 12 : 10),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: action!,
-              ),
+              Align(alignment: Alignment.centerLeft, child: action!),
             ],
           ],
         );
